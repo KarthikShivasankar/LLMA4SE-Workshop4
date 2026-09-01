@@ -13,11 +13,12 @@ Contact: karthik13sankar@outlook.com
 
 | File | What it is | Who it's for |
 |---|---|---|
-| `LLMA4SE_Workshop4_Colab.ipynb` | **The workshop.** One self-contained Google Colab notebook: all four parts, six agents, four static-analysis tools, a packaged CLI. | Students — this is the only file they need |
-| `LLMA4SE_Workshop4_Slides.pptx` | Lecture slides interleaved with the notebook sections. | Instructors (projected) |
+| `LLMA4SE_Workshop4_Colab.ipynb` | **The workshop.** One self-contained Google Colab notebook: all four parts, six agents, four static-analysis tools, a packaged CLI. Everything — key, installs, the `debtbuster` CLI — runs inside Colab. | Students — this is the only file they need |
+| `LLMA4SE_Workshop4_Slides.pptx` | 20 lecture slides interleaved with the notebook sections. | Instructors (projected) |
 | `instruction_note.md` | Minute-by-minute run of show, talking points, discussion prompts, troubleshooting. | Instructors |
 | `students_handout.md` | Concepts, glossary, exercises, references — to keep. | Students (print or share) |
 | `requirements.txt` | The dependency list (the notebook installs these itself). | Local runs / reference |
+| `debtbuster/` | Offline **mirror** of the CLI package. Canonical source: [its own repo](https://github.com/KarthikShivasankar/debtbuster) — that is what Part 4 installs. | Reference only |
 
 ## Requirements
 
@@ -38,9 +39,25 @@ pip install code-quality-analyzer ml-code-smell-detector radon pylint pytest pan
 1. Go to [colab.research.google.com](https://colab.research.google.com) → **File → Upload notebook** → pick `LLMA4SE_Workshop4_Colab.ipynb`.
 2. Provide your API key **one** of three ways (the notebook tries them in order):
    - upload a `.env` file containing `OPENAI_API_KEY=sk-...` (optionally `OPENAI_MODEL=...`);
-   - add `OPENAI_API_KEY` under Colab **Secrets** (🔑 in the left sidebar) and enable notebook access — *recommended*;
+   - add `OPENAI_API_KEY` under Colab **Secrets** (🔑 in the left sidebar) and enable notebook access — *recommended*; add an optional second secret `OPENAI_MODEL` to pin the model;
    - let the notebook prompt you with a hidden input box.
 3. Run cells top to bottom.
+
+### What the markers in the notebook mean
+
+The notebook is built to be *run*, not read. Five markers tell students what a cell wants from them:
+
+| Marker | Action | Time |
+|---|---|---|
+| 🎯 **Predict** | edit a `MY_GUESS_…` line **before** running; the notebook grades the guess and keeps a running score | 30 s |
+| 🧪 **Try it** | change one thing, re-run, watch what breaks | 1–3 min |
+| 💬 **Discuss** | pair discussion, no single right answer | 1–2 min |
+| ✍️ **Exercise** | code in the workspace cell; solutions in a `<details>` toggle | 10–15 min |
+| ⏱ **Pit stop** | `pit_stop("Part 2")` prints elapsed vs. budgeted time and tells stragglers what to skip | 5 s |
+
+There are four 🎯 predictions (complexity guessing, the sabotage gate, zero-shot accuracy, the CLI exit code)
+and a `scoreboard()` at the end. Each Part closes with a cell that saves its result, so a student who falls
+behind can skip the exercise and still start the next Part.
 
 > ⚠️ **Never paste a key into a code cell.** Notebooks get shared, committed and screenshotted.
 
@@ -70,6 +87,23 @@ Six agents, wired into one pipeline:
 
 Then the same pipeline is rebuilt in **LangGraph**, handed to an autonomous **Deep Agent**, and packaged as **`debtbuster`** — a `pip install`-able CLI that exits non-zero when the QA gate rejects, so it drops straight into CI.
 
+### `debtbuster` — the pipeline as a published package
+
+Part 4 does **not** paste source into the notebook. Students `pip install` the real thing from its own public repository and drive it as a shell command:
+
+```bash
+pip install "git+https://github.com/KarthikShivasankar/debtbuster.git"
+
+debtbuster audit inventory.py                            # deterministic only — no LLM, no cost
+debtbuster fix   inventory.py --tests test_inventory.py  # the agent team, behind three gates
+```
+
+Repository: **[github.com/KarthikShivasankar/debtbuster](https://github.com/KarthikShivasankar/debtbuster)** (MIT).
+
+The key reaches the subprocess through `os.environ`, exactly as it would in CI — nothing is baked into the package. `fix` exits **1** when the gate rejects and writes nothing, which is what makes it safe to put in a pipeline.
+
+The notebook explains the package rather than reprinting it: what each of the six files does, which single file can hallucinate (`brain.py` — the other five are deterministic), and why the exit code is the real product.
+
 ## The two "patients" students operate on
 
 - `inventory.py` — a working-but-smelly business module (mutable default arg, 7-param function, magic numbers, duplicated pricing logic, dead code) pinned by **7 behaviour tests**.
@@ -80,6 +114,8 @@ Then the same pipeline is rebuilt in **LangGraph**, handed to an autonomous **De
 - **PyExamine** — *MSR 2025* · `pip install code-quality-analyzer` · [github.com/KarthikShivasankar/python_smells_detector](https://github.com/KarthikShivasankar/python_smells_detector)
 - **MLScent** — *CAIN 2025* · `pip install ml-code-smell-detector` · [arXiv:2502.18466](https://arxiv.org/abs/2502.18466)
 - **BEACon-TD / TD-Suite** — *JSS 2025* · [github.com/KarthikShivasankar/text_classification](https://github.com/KarthikShivasankar/text_classification)
+- **debtbuster** — today's pipeline as an installable CLI · `pip install git+https://github.com/KarthikShivasankar/debtbuster.git` · [github.com/KarthikShivasankar/debtbuster](https://github.com/KarthikShivasankar/debtbuster)
+- **tree-sitter** — the polyglot, incremental, error-tolerant parser §1.4 contrasts with Python's `ast` · [tree-sitter.github.io](https://tree-sitter.github.io/)
 
 ## The thesis, in one sentence
 

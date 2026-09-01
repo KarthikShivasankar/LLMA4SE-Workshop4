@@ -19,6 +19,25 @@ Keep this. Everything you build today runs in **one Colab notebook** and fits in
 
 > ⚠️ **Never paste a key into a code cell.** Notebooks get shared, committed and screenshotted.
 > 💰 The whole notebook costs roughly **$0.05–0.25**. `cost_report()` shows the running total any time.
+> 🔑 The key lives in `os.environ`, never in the code — which is why Part 4's `!debtbuster` shell commands
+> inherit it for free, and why the same package is safe to install in CI.
+
+### How the notebook talks to you
+
+| Marker | What to do | Time |
+|---|---|---|
+| 🎯 **Predict** | edit the `MY_GUESS_…` line **before** running the cell — you get graded, and a running score | 30 s |
+| 🧪 **Try it** | change one thing, re-run, see what breaks | 1–3 min |
+| 💬 **Discuss** | talk to your neighbour; no single right answer | 1–2 min |
+| ✍️ **Exercise** | write code in the workspace cell; the solution is one click away in a `<details>` toggle | 10–15 min |
+| ⏱ **Pit stop** | `pit_stop("Part 2")` — elapsed vs budgeted time, and whether to skip ahead | 5 s |
+
+Four 🎯 predictions across the afternoon (§1.2 complexity · §2.7 the sabotage gate · §3.2 classifier accuracy ·
+§4.5 the CLI exit code), then `scoreboard()` in the last cell. **Getting one wrong is the useful outcome** —
+each is a place where intuition about LLMs is usually miscalibrated.
+
+**Falling behind is fine.** Every Part ends with a cell that saves its result and self-checks. Skip the
+exercise, run that cell, start the next Part. Nothing later depends on your exercise answers.
 
 ---
 
@@ -42,6 +61,31 @@ Studies put the waste at roughly **23–42% of development time**. Triage rule f
 4. a **contract** — a strict JSON or code-block schema, so the next agent can **parse**, not *read*.
 
 Change the role and the tools, keep the skeleton: that is how the Code Auditor became the ML Auditor in two cells.
+
+**AST — how every tool today actually sees your code (§1.4).** A parser turns your file from *characters*
+into a *tree*. `if qty > 10 and price < 5:` becomes an `If` node whose test is a `BoolOp(And)` over two
+`Compare` nodes. "Abstract" means the formatting is gone: `if x>10:` and the same condition split over three
+lines produce the **identical** tree — and the word `if` inside a string literal is not a branch. That is why
+a tool built on the AST is exact where a regex is merely hopeful.
+
+Cyclomatic complexity then becomes one sentence: **start at 1, add 1 per decision node** (`if`, `for`,
+`while`, `except`, `with`, comprehensions, and each `and`/`or`, since they short-circuit). Twelve lines of the
+stdlib `ast` module reproduce radon closely enough to see the idea.
+
+**tree-sitter (§1.4).** Python's `ast` is Python-only, refuses to parse broken code, and re-parses the whole
+file every time. [tree-sitter](https://tree-sitter.github.io/) is the same idea built for the other cases:
+100+ languages behind one API, it returns a usable tree with an `ERROR` node when the code is *currently
+invalid* (which is why editors use it — you are halfway through typing), and it re-parses **incrementally**,
+in about a millisecond. For agent work its most useful role is **chunking a repository for retrieval at
+function and class boundaries** instead of every 500 characters. Rule of thumb: Python only, offline → stdlib
+`ast`; polyglot repo, editor tooling, half-typed code, or code-RAG → tree-sitter.
+
+**Why tools, not prompts (§1.2, measured live).** Asked to compute cyclomatic complexity with no tools, the
+model gets most functions right and is off by one on the worst function — the exact number you needed. No
+error, no uncertainty flag. *A metric you cannot trust to ±1 is a metric you cannot gate on.* The same cell
+also produced a second, subtler failure: the model answered `"InventoryManager.process_order"` where `radon`
+says `"process_order"`. Nobody was wrong; the two disagreed about **format**. That is **contract drift**, and
+it is the most common reason agent pipelines break in production.
 
 **Blackboard state.** Every agent reads and writes one shared `WorkflowState` with a `record()` audit trail — a flight recorder for the workflow. The alternative is message passing (agents talk point-to-point). Blackboard wins on **auditability** for small teams; message passing scales to larger, decoupled ones.
 
@@ -103,14 +147,43 @@ Then in Part 4 the same team is rebuilt three ways — **LangGraph**, an autonom
 
 | # | Where | Task |
 |---|---|---|
-| **1** | §1.6 | Write an AST tool that finds magic numbers, register it on the auditor, re-audit. *Lesson: capability grows through **tools**, not bigger models.* |
-| **2A** | §2.6 | Add a Documenter agent — docstrings only, nothing else changed — and push its output through the same gate. |
-| **2B** | §2.6 | Add a 4th gate: maintainability index must improve too. Does anything still get accepted? |
-| **2C** | §2.6 | Delete one HARD RULE from the refactorer prompt. Which one was load-bearing? |
-| **3** | §3.5 | **Bring your own code.** Paste a module of yours, write 2–3 behaviour tests, run `full_pipeline`. |
-| **4A** | §4.4 | Add an MLScent gate: reject any patch that increases the ML smell count. |
-| **4B** | §4.4 | Swap `config.MODEL`. Measure iterations-to-acceptance, wall clock, and cost. Is the expensive model cheaper *per accepted patch*? |
-| **4C** | §4.4 | Give the Deep Agent the gate as a tool. Does an autonomous agent voluntarily verify itself? |
+| **1** | §1.8 | Write an AST tool that finds magic numbers, register it on the auditor, re-audit. *Lesson: capability grows through **tools**, not bigger models.* |
+| **2A** | §2.8 | Add a Documenter agent — docstrings only, nothing else changed — and push its output through the same gate. |
+| **2B** | §2.8 | Add a 4th gate: maintainability index must improve too. Does anything still get accepted? |
+| **2C** | §2.8 | Delete one HARD RULE from the refactorer prompt. Which one was load-bearing? |
+| **3** | §3.7 | **Bring your own code.** Paste a module of yours, write 2–3 behaviour tests, run `full_pipeline`. |
+### `debtbuster` — take the pipeline home (§4.5)
+
+Everything in Parts 1–3 also exists as a published package, so you can run it on your own repositories:
+
+```bash
+pip install "git+https://github.com/KarthikShivasankar/debtbuster.git"
+export OPENAI_API_KEY=sk-...
+
+debtbuster audit  src/module.py                              # deterministic only — no LLM, no cost
+debtbuster fix    src/module.py --tests tests/test_module.py # the agent team, behind three gates
+```
+
+Six files. **Exactly one of them can hallucinate** (`brain.py`, the only place a model is called) — the tools,
+the gates and the CLI are deterministic, so you can audit the whole thing's trustworthiness by reading about
+60 lines. `fix` writes `module.refactored.py` and exits **0** only when a candidate passed all three gates;
+otherwise it exits **1** and writes nothing. That integer is what makes it safe in CI:
+
+```yaml
+- run: debtbuster fix src/module.py --tests tests/test_module.py
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+```
+
+Omit `--tests` and gate 2 is skipped — nothing then checks that the module still *does* the same thing. That
+is technical debt with a price tag you can read directly: **an agent may only be trusted to change what your
+tests already pin down.**
+
+Source & docs: **[github.com/KarthikShivasankar/debtbuster](https://github.com/KarthikShivasankar/debtbuster)** (MIT).
+
+| **4A** | §4.6 | Add an MLScent gate: reject any patch that increases the ML smell count. |
+| **4B** | §4.6 | Swap `config.MODEL`. Measure iterations-to-acceptance, wall clock, and cost. Is the expensive model cheaper *per accepted patch*? |
+| **4C** | §4.6 | Give the Deep Agent the gate as a tool. Does an autonomous agent voluntarily verify itself? |
 
 ---
 
