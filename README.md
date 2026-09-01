@@ -4,8 +4,6 @@
 **LLMA4SE 2026** — 2nd International Summer School on LLM-based Agents for Software Engineering
 Day 3 · **15:00 – 18:00**
 
-Instructors: **Karthik Shivashankar** (SINTEF Digital / University of Oslo) & **Adela Nedisan Videsjorden** (University of Oslo)
-Contact: karthik13sankar@outlook.com
 
 ---
 
@@ -117,6 +115,8 @@ The notebook explains the package rather than reprinting it: what each of the si
 - **debtbuster** — today's pipeline as an installable CLI · `pip install git+https://github.com/KarthikShivasankar/debtbuster.git` · [github.com/KarthikShivasankar/debtbuster](https://github.com/KarthikShivasankar/debtbuster)
 - **tree-sitter** — the polyglot, incremental, error-tolerant parser §1.4 contrasts with Python's `ast` · [tree-sitter.github.io](https://tree-sitter.github.io/)
 
-## The thesis, in one sentence
+
 
 > **Deterministic tools measure, the LLM interprets, and a gate decides.** Everything else is plumbing.
+
+For questions Contact: **Adela Nedisan Videsjorden** (SINTEF Digital)  & **Karthik Shivashankar** (SINTEF Digital)
