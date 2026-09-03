@@ -1,15 +1,13 @@
-# debtbuster (mirror)
+# debtbuster (workshop copy)
 
-> ⚠️ **The canonical source now lives in its own repository:**
-> **https://github.com/KarthikShivasankar/debtbuster**
->
-> Install it from there — the notebook does:
->
-> ```bash
-> pip install "git+https://github.com/KarthikShivasankar/debtbuster.git"
-> ```
+OpenRouter via `openai.OpenAI(base_url=https://openrouter.ai/api/v1)`.
 
-This directory is a snapshot kept alongside the workshop material for offline reading. It is **not** what
-Part 4 installs, so treat the standalone repository as the source of truth and make changes there.
+```bash
+pip install -e .
+export OPENROUTER_API_KEY=sk-or-...
+export LLM_MODEL=openai/gpt-4o-mini
+debtbuster audit path/to/module.py
+debtbuster fix   path/to/module.py --tests path/to/test_module.py
+```
 
-See that repository's README for what the harness does, the three LLM-free gates, and the file-by-file layout.
+This folder is what Part 4 installs (`pip install -e ./debtbuster`). The standalone GitHub package may still read `OPENAI_API_KEY`.

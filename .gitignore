@@ -5,3 +5,11 @@ __pycache__/
 build/
 dist/
 .venv/
+patients/
+workshop/
+AUDIT.md
+TECH_DEBT_REPORT.md
+findings.json
+timed_refactored.py
+pyx.txt
+output/
