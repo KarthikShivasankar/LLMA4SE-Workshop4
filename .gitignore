@@ -1,4 +1,6 @@
 .env
+AGENTS.md
+instruction_note.md
 .ipynb_checkpoints/
 __pycache__/
 .venv/
