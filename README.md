@@ -60,6 +60,4 @@ Any [OpenRouter slug](https://openrouter.ai/models) via `LLM_MODEL` + `switch_mo
 - **Churn trainer** — `cases/churn/train_churn.py` (scaler leakage, missing seed, train score reported)
 - Part 4 classifies and triages six public issues from Flask, Requests, HTTPX, Pylint, and Django (`priority = interest ÷ principal`)
 
-After Part 4, `python -m debtbuster audit` / `fix` is the take-home CLI (OpenRouter-aware). Exit 0 = accepted patch; exit 1 = gate held. A traceback is a harness bug, not a verdict. Do not `pip install` the public GitHub `debtbuster` package for this session — it still expects `OPENAI_API_KEY`.
-
 Contact: **Adela Nedisan Videsjorden** & **Karthik Shivashankar** (SINTEF Digital)

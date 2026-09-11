@@ -12,7 +12,7 @@ Deterministic tools *measure*, LLMs *interpret*, gates *decide*.
 3. Optional: `LLM_MODEL=<openrouter-slug>`. If you stay on OpenAI, use only `openai/gpt-5.6-luna`. Change provider later with `switch_model("anthropic/…")`.
 4. Run Part 0 through §0.4. A one-sentence definition of a code smell means you are ready.
 
-Never paste a key into a code cell. The key lives in `os.environ` so later `python -m debtbuster` inherits it.
+Never paste a key into a code cell. The key lives in `os.environ`.
 
 Markers: **Try it** · **Discuss** · **Pit stop**. Every tool and LLM call prints a TRACE block (command, exit code, raw reply). Silence (`reply: 0 chars`) is a *model* problem — switch back to luna.
 
@@ -50,20 +50,6 @@ Markers: **Try it** · **Discuss** · **Pit stop**. Every tool and LLM call prin
 | Runaway loops | `max_iterations` / Deep Agents `recursion_limit` |
 | Empty / 0 findings | free model returned prose — `switch_model("openai/gpt-5.6-luna")` |
 | Unverifiable claims | no LLM in QA |
-
-## Take home
-
-After Part 4 the notebook writes `debtbuster/` for you:
-
-```bash
-pip install -e ./debtbuster
-export OPENROUTER_API_KEY=sk-or-...
-export LLM_MODEL=openai/gpt-5.6-luna
-python -m debtbuster audit  path/to/module.py
-python -m debtbuster fix    path/to/module.py --tests path/to/test_module.py
-```
-
-`fix` exits 0 when the patch is accepted, 1 and writes nothing when the gate rejects. A traceback is a harness bug, not a verdict. Point `fix` at *your* tests, not `test_checkout.py`.
 
 ## Remember
 
