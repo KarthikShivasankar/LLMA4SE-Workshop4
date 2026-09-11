@@ -18,7 +18,7 @@ Smell detectors (install from PyPI; these *are* the GitHub repos):
 
 ## Run
 
-**Colab:** CPU runtime. Open the `.ipynb`. Ignore *Restart session* and the `google-auth` warning after the pip cell. Do **not** `git clone` into `/content/LLMA4SE-Workshop4` (that was the exit-128 failure). Part 4 writes `debtbuster/` from the embedded snapshot if the folder is missing.
+**Colab:** CPU runtime. Open the `.ipynb`. Ignore *Restart session* and the `google-auth` warning after the pip cell. 
 
 **Local:** create a `.env` next to the notebook (never commit it):
 
