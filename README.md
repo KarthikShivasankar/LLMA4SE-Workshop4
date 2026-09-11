@@ -14,7 +14,6 @@ Smell detectors (install from PyPI; these *are* the GitHub repos):
 |---|---|
 | `LLMA4SE_Workshop4_Colab.ipynb` | Students — the whole workshop (Colab or local Jupyter). Runtime and a `debtbuster/` snapshot are inlined. |
 | `LLMA4SE_Workshop4_Slides.pptx` | Instructors — room slides |
-| `instruction_note.md` | Instructors |
 | `students_handout.md` | Students (keep open) |
 
 ## Run
